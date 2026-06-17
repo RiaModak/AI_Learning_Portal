@@ -10,8 +10,8 @@ import re
 from pydantic import BaseModel
 import json
 from dotenv import load_dotenv
-load_dotenv()
-import os
+
+load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), ".env"))
 
 client = Groq(api_key=os.getenv("GROQ_API_KEY"))
 
