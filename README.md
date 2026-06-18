@@ -90,32 +90,46 @@ AI_Learning_Portal/
 
 ### 
 1. Clone the repository
+
 git clone https://github.com/RiaModak/AI_Learning_Portal.git
+
 cd AI_Learning_Portal
 
 2. Create and activate a virtual environment
+
 python -m venv venv
+
 venv\Scripts\activate
 
 3. Install dependencies
+
 pip install -r requirements.txt
 
 4. Set up environment variables
+
 Create a .env file inside llmapi/:
+
 GROQ_API_KEY=your_groq_api_key_here
 
 ## Running the Project
 
 1. Start Django (Main Portal)
+
 python manage.py migrate
+
 python manage.py createsuperuser   # optional
+
 python manage.py runserver
+
 Django runs on:
 http://127.0.0.1:8000
 
 3. Start FastAPI (AI Question Generator)
+
 cd llmapi
+
 uvicorn main:app --reload --port 8001
+
 FastAPI runs on:
 http://127.0.0.1:8001
 
