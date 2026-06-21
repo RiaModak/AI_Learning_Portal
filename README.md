@@ -55,21 +55,6 @@ AI_Learning_Portal/
 │   ├── templatetags/
 │   │   └── filters.py           # Custom template filters
 │   └── templates/               # Frontend pages
-│       ├── admin_dashboard.html
-│       ├── base.html
-│       ├── login.html
-│       ├── solve_ai_test.html
-│       ├── student_dashboard.html
-│       ├── teacher_dashboard.html
-│       ├── view_ai_test_result.html
-│       ├── view_generated_test.html
-│       ├── student/
-│       │   ├── solve_tests.html
-│       │   ├── test_result.html
-│       │   └── view_tests.html
-│       └── teacher/
-│           ├── add_questions.html
-│           └── manage_tests.html
 │   
 ├── project/                     # Main Django project folder
 │   ├── settings.py              
