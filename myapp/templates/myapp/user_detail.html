@@ -1,117 +1,183 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8" />
     <title>User Details</title>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/css/bootstrap.min.css" />
+
+    <style>
+        body {
+            background-color: #f4f4f4;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        nav {
+            background-color: #2f3d4b;
+            padding: 20px;
+            color: white;
+            text-align: center;
+            font-size: 1.6rem;
+            font-weight: bold;
+            margin-bottom: 30px;
+            letter-spacing: 1px;
+            border-bottom: 3px solid #1d2733;
+        }
+
+        .container {
+            max-width: 900px;
+            padding: 30px;
+        }
+
+        .card {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0px 4px 12px rgba(0,0,0,0.12);
+            padding: 25px;
+            margin-bottom: 30px;
+            transition: 0.3s ease-in-out;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+        }
+
+        h2, h3 {
+            color: #2f3d4b;
+            font-weight: 600;
+        }
+
+        h3 {
+            border-bottom: 2px solid #eee;
+            padding-bottom: 8px;
+            margin-top: 25px;
+            margin-bottom: 15px;
+        }
+
+        .messages-box {
+            padding: 12px;
+            margin-bottom: 15px;
+            border-radius: 6px;
+            background: #d4edda;
+            border: 1px solid #28a745;
+            color: #155724;
+            font-size: 0.95rem;
+        }
+
+        .btn {
+            padding: 6px 14px;
+            font-size: 0.9rem;
+            border-radius: 5px;
+            transition: 0.3s ease-in-out;
+        }
+
+        .btn:hover {
+            transform: scale(1.05);
+        }
+
+        .btn-primary {
+            background-color: #2f3d4b;
+            border: none;
+        }
+
+        .btn-primary:hover {
+            background-color: #1d2733;
+        }
+
+        .btn-secondary {
+            background-color: #6c757d;
+            border: none;
+        }
+
+        .btn-secondary:hover {
+            background-color: #5a6268;
+        }
+
+        ul {
+            padding-left: 20px;
+        }
+    </style>
 </head>
+
 <body>
 
-<h1>User Details</h1>
-{% if messages %}
-    {% for message in messages %}
-        <div style="
-            padding:10px;
-            margin-bottom:10px;
-            border:1px solid green;
-            background:#d4edda;
-        ">
-            {{ message }}
+<nav>
+    User Details
+</nav>
+
+<div class="container">
+
+    <div class="card">
+
+        {% if messages %}
+            {% for message in messages %}
+                <div class="messages-box">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <h2>{{ user_obj.username }}</h2>
+
+        <p><strong>Role:</strong> {{ role }}</p>
+        <p><strong>Name:</strong> {{ user_obj.first_name }} {{ user_obj.last_name }}</p>
+        <p><strong>Email:</strong> {{ user_obj.email }}</p>
+        <p><strong>Active:</strong> {{ user_obj.is_active }}</p>
+        <p><strong>Staff:</strong> {{ user_obj.is_staff }}</p>
+        <p><strong>Superuser:</strong> {{ user_obj.is_superuser }}</p>
+        <p><strong>Date Joined:</strong> {{ user_obj.date_joined }}</p>
+        <p><strong>Last Login:</strong> {{ user_obj.last_login }}</p>
+
+        <h3>Groups</h3>
+        <ul>
+            {% for group in user_obj.groups.all %}
+                <li>{{ group.name }}</li>
+            {% endfor %}
+        </ul>
+
+        {% if role == 'Teacher' %}
+            <h3>Teacher Courses</h3>
+            <ul>
+                {% for course in teacher_courses %}
+                    <li>{{ course.name }}</li>
+                {% empty %}
+                    <li>No assigned courses</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+
+        {% if role == 'Student' %}
+            <h3>Student Enrollments</h3>
+            <ul>
+                {% for enrollment in enrolled_courses %}
+                    <li>{{ enrollment.course.name }}</li>
+                {% empty %}
+                    <li>No enrollments</li>
+                {% endfor %}
+            </ul>
+
+            <h3>Assignment Submissions</h3>
+            <p>{{ assignment_submissions.count }}</p>
+
+            <h3>AI Test Attempts</h3>
+            <p>{{ ai_submissions.count }}</p>
+        {% endif %}
+
+        <div class="mt-4">
+            <a href="{% url 'edit_user' user_obj.id %}" class="btn btn-primary">
+                Edit User
+            </a>
+            <a href="{% url 'superadmin_dashboard' %}" class="btn btn-secondary ms-2">
+                Back
+            </a>
         </div>
-    {% endfor %}
-{% endif %}
-<h2>{{ user_obj.username }}</h2>
-<p><strong>Role:</strong> {{ role }}</p>
 
-<p><strong>Name:</strong>
-{{ user_obj.first_name }}
-{{ user_obj.last_name }}
-</p>
+    </div>
 
-<p><strong>Email:</strong>
-{{ user_obj.email }}
-</p>
+</div>
 
-<p><strong>Active:</strong>
-{{ user_obj.is_active }}
-</p>
-
-<p><strong>Staff:</strong>
-{{ user_obj.is_staff }}
-</p>
-
-<p><strong>Superuser:</strong>
-{{ user_obj.is_superuser }}
-</p>
-
-<p><strong>Date Joined:</strong>
-{{ user_obj.date_joined }}
-</p>
-
-<p><strong>Last Login:</strong>
-{{ user_obj.last_login }}
-</p>
-
-<h3>Groups</h3>
-
-<ul>
-{% for group in user_obj.groups.all %}
-    <li>{{ group.name }}</li>
-{% endfor %}
-</ul>
-
-{% if role == 'Teacher' %}
-
-<h3>Teacher Courses</h3>
-
-<ul>
-{% for course in teacher_courses %}
-    <li>{{ course.name }}</li>
-{% empty %}
-    <li>No assigned courses</li>
-{% endfor %}
-</ul>
-
-{% endif %}
-
-{% if role == 'Student' %}
-
-<h3>Student Enrollments</h3>
-
-<ul>
-{% for enrollment in enrolled_courses %}
-    <li>{{ enrollment.course.name }}</li>
-{% empty %}
-    <li>No enrollments</li>
-{% endfor %}
-</ul>
-
-{% endif %}
-
-{% if role == 'Student' %}
-
-<h3>Assignment Submissions</h3>
-
-<p>{{ assignment_submissions.count }}</p>
-
-{% endif %}
-
-{% if role == 'Student' %}
-
-<h3>AI Test Attempts</h3>
-
-<p>{{ ai_submissions.count }}</p>
-
-{% endif %}
-
-<br><br>
-
-<a href="{% url 'edit_user' user_obj.id %}">
-    Edit User
-</a>
-
-<br><br>
-<a href="{% url 'superadmin_dashboard' %}">
-    Back
-</a>
-
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
