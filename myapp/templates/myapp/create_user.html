@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Create User</title>
+</head>
+<body>
+
+<h1>Create User</h1>
+
+<form method="POST">
+
+    {% csrf_token %}
+
+    {{ form.as_p }}
+
+    <button type="submit">
+        Create User
+    </button>
+
+</form>
+
+<br>
+
+<a href="{% url 'superadmin_dashboard' %}">
+    Back
+</a>
+
+</body>
+</html>

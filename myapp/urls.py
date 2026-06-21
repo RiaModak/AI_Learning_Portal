@@ -6,6 +6,7 @@ urlpatterns = [
     path('login/', views.custom_login, name='login'),
     path('logout/', views.custom_logout, name='logout'),
     path('admin-dashboard/', views.admin_dashboard, name='admin_dashboard'),
+    path('superadmin-dashboard/', views.superadmin_dashboard, name='superadmin_dashboard'),
     path('teacher-dashboard/', views.teacher_dashboard, name='teacher_dashboard'),
     path('student-dashboard/', views.student_dashboard, name='student_dashboard'),
     path('teacher/tests/', views.manage_tests, name='manage_tests'),
@@ -17,6 +18,8 @@ urlpatterns = [
     path('ai-test/<int:qna_id>/solve/', views.solve_ai_test, name='solve_ai_test'),
     path('ai-test/<int:qna_id>/result/', views.view_ai_test_result, name='view_ai_test_result'),
     path('run-evaluation/', views.run_descriptive_evaluation, name='run_evaluation'),
-
-
+    path('superadmin/user/<int:user_id>/',views.user_detail,name='user_detail'),
+    path('superadmin/user/<int:user_id>/edit/',views.edit_user,name='edit_user'),
+    path('superadmin/create-user/',views.create_user,name='create_user'),
+    path('superadmin/user/<int:user_id>/delete/',views.delete_user,name='delete_user'),
 ]

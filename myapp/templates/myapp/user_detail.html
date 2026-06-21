@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>User Details</title>
+</head>
+<body>
+
+<h1>User Details</h1>
+{% if messages %}
+    {% for message in messages %}
+        <div style="
+            padding:10px;
+            margin-bottom:10px;
+            border:1px solid green;
+            background:#d4edda;
+        ">
+            {{ message }}
+        </div>
+    {% endfor %}
+{% endif %}
+<h2>{{ user_obj.username }}</h2>
+<p><strong>Role:</strong> {{ role }}</p>
+
+<p><strong>Name:</strong>
+{{ user_obj.first_name }}
+{{ user_obj.last_name }}
+</p>
+
+<p><strong>Email:</strong>
+{{ user_obj.email }}
+</p>
+
+<p><strong>Active:</strong>
+{{ user_obj.is_active }}
+</p>
+
+<p><strong>Staff:</strong>
+{{ user_obj.is_staff }}
+</p>
+
+<p><strong>Superuser:</strong>
+{{ user_obj.is_superuser }}
+</p>
+
+<p><strong>Date Joined:</strong>
+{{ user_obj.date_joined }}
+</p>
+
+<p><strong>Last Login:</strong>
+{{ user_obj.last_login }}
+</p>
+
+<h3>Groups</h3>
+
+<ul>
+{% for group in user_obj.groups.all %}
+    <li>{{ group.name }}</li>
+{% endfor %}
+</ul>
+
+{% if role == 'Teacher' %}
+
+<h3>Teacher Courses</h3>
+
+<ul>
+{% for course in teacher_courses %}
+    <li>{{ course.name }}</li>
+{% empty %}
+    <li>No assigned courses</li>
+{% endfor %}
+</ul>
+
+{% endif %}
+
+{% if role == 'Student' %}
+
+<h3>Student Enrollments</h3>
+
+<ul>
+{% for enrollment in enrolled_courses %}
+    <li>{{ enrollment.course.name }}</li>
+{% empty %}
+    <li>No enrollments</li>
+{% endfor %}
+</ul>
+
+{% endif %}
+
+{% if role == 'Student' %}
+
+<h3>Assignment Submissions</h3>
+
+<p>{{ assignment_submissions.count }}</p>
+
+{% endif %}
+
+{% if role == 'Student' %}
+
+<h3>AI Test Attempts</h3>
+
+<p>{{ ai_submissions.count }}</p>
+
+{% endif %}
+
+<br><br>
+
+<a href="{% url 'edit_user' user_obj.id %}">
+    Edit User
+</a>
+
+<br><br>
+<a href="{% url 'superadmin_dashboard' %}">
+    Back
+</a>
+
+</body>
+</html>

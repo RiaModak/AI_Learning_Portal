@@ -11,28 +11,66 @@ from .models import AITestSubmission, TestSourceDocument
 from .models import AIStudentAnswer 
 
 def home(request):
-    return render(request, 'myapp/login.html')
 
+    if request.user.is_authenticated:
+
+        if request.user.is_superuser:
+            return redirect('superadmin_dashboard')
+
+        elif request.user.groups.filter(name='Admin').exists():
+            return redirect('admin_dashboard')
+
+        elif request.user.groups.filter(name='Teacher').exists():
+            return redirect('teacher_dashboard')
+
+        elif request.user.groups.filter(name='Student').exists():
+            return redirect('student_dashboard')
+
+    return render(request, 'myapp/login.html')
 def custom_login(request):
+
     if request.method == 'POST':
+
         username = request.POST['username']
         password = request.POST['password']
-        user = authenticate(request, username=username, password=password)
+
+        user = authenticate(
+            request,
+            username=username,
+            password=password
+        )
 
         if user:
+
             login(request, user)
-            if user.groups.filter(name='Admin').exists():
+
+            if user.is_superuser:
+                return redirect('superadmin_dashboard')
+
+            elif user.groups.filter(name='Admin').exists():
                 return redirect('admin_dashboard')
+
             elif user.groups.filter(name='Teacher').exists():
                 return redirect('teacher_dashboard')
+
             elif user.groups.filter(name='Student').exists():
                 return redirect('student_dashboard')
-            else:
-                return render(request, 'myapp/login.html', {'error': 'No group assigned.'})
-        else:
-            return render(request, 'myapp/login.html', {'error': 'Invalid credentials'})
-    return render(request, 'myapp/login.html')
 
+            else:
+                return render(
+                    request,
+                    'myapp/login.html',
+                    {'error': 'No role assigned.'}
+                )
+
+        else:
+            return render(
+                request,
+                'myapp/login.html',
+                {'error': 'Invalid credentials'}
+            )
+
+    return render(request, 'myapp/login.html')
 def custom_logout(request):
     logout(request)
     return redirect('login')
@@ -728,3 +766,237 @@ def run_descriptive_evaluation(request):
 
     return JsonResponse({"status": "Evaluation complete"})
 
+from django.contrib.auth.models import User
+from django.db.models import Q
+
+@login_required
+def superadmin_dashboard(request):
+
+    if not request.user.is_superuser:
+        messages.error(request, "Access Denied")
+        return redirect('login')
+
+    search = request.GET.get('search', '')
+    role = request.GET.get('role', '')
+    status = request.GET.get('status', '')
+
+    users = User.objects.all()
+
+    if search:
+        users = users.filter(
+            Q(username__icontains=search) |
+            Q(first_name__icontains=search) |
+            Q(last_name__icontains=search) |
+            Q(email__icontains=search)
+        )
+
+    if role:
+        users = users.filter(groups__name=role)
+
+    if status == 'active':
+        users = users.filter(is_active=True)
+
+    elif status == 'inactive':
+        users = users.filter(is_active=False)
+
+    users = users.order_by('username')
+
+    context = {
+        'total_users': User.objects.count(),
+        'total_teachers': User.objects.filter(groups__name='Teacher').count(),
+        'total_students': User.objects.filter(groups__name='Student').count(),
+        'total_courses': Course.objects.count(),
+        'total_assignments': Assignment.objects.count(),
+        'total_tests': Test.objects.count(),
+
+        'users': users,
+        'search': search,
+        'role': role,
+        'status': status,
+    }
+
+    return render(
+        request,
+        'myapp/superadmin_dashboard.html',
+        context
+    )
+
+@login_required
+def user_detail(request, user_id):
+
+    if not request.user.is_superuser:
+        messages.error(request, "Access Denied")
+        return redirect('home')
+
+    user_obj = get_object_or_404(User, id=user_id)
+
+    enrolled_courses = StudentCourseEnrollment.objects.filter(
+        student=user_obj
+    )
+
+    teacher_courses = Course.objects.filter(
+        teachers=user_obj
+    )
+
+    assignment_submissions = StudentAssignmentSubmission.objects.filter(
+        student=user_obj
+    )
+
+    ai_submissions = AITestSubmission.objects.filter(
+        student=user_obj
+    )
+    role = "No Role"
+
+    if user_obj.groups.filter(name='Admin').exists():
+        role = "Admin"
+
+    elif user_obj.groups.filter(name='Teacher').exists():
+        role = "Teacher"
+
+    elif user_obj.groups.filter(name='Student').exists():
+        role = "Student"
+    context = {
+        'user_obj': user_obj,
+        'enrolled_courses': enrolled_courses,
+        'teacher_courses': teacher_courses,
+        'assignment_submissions': assignment_submissions,
+        'ai_submissions': ai_submissions,
+        'role': role,
+    }
+
+    return render(
+        request,
+        'myapp/user_detail.html',
+        context
+    )
+from .forms import UserEditForm
+@login_required
+def edit_user(request, user_id):
+
+    if not request.user.is_superuser:
+        messages.error(request, "Access Denied")
+        return redirect('home')
+
+    user_obj = get_object_or_404(User, id=user_id)
+
+    if request.method == 'POST':
+
+        form = UserEditForm(
+            request.POST,
+            instance=user_obj
+        )
+
+        if form.is_valid():
+
+            user = form.save()
+
+            # Update Role
+            role = form.cleaned_data['role']
+
+            user.groups.clear()
+
+            group = Group.objects.get(name=role)
+            user.groups.add(group)
+
+            # Update Password
+            password = form.cleaned_data['new_password']
+
+            if password:
+                user.set_password(password)
+                user.save()
+
+            messages.success(
+                request,
+                "User updated successfully."
+            )
+
+            return redirect(
+                'user_detail',
+                user_id=user.id
+            )
+
+    else:
+
+        form = UserEditForm(
+            instance=user_obj
+        )
+
+    return render(
+        request,
+        'myapp/edit_user.html',
+        {
+            'form': form,
+            'user_obj': user_obj
+        }
+    )
+
+from .forms import UserCreateForm
+from django.contrib.auth.models import User, Group
+@login_required
+def create_user(request):
+
+    if not request.user.is_superuser:
+        messages.error(request, "Access Denied")
+        return redirect('home')
+
+    if request.method == 'POST':
+
+        form = UserCreateForm(request.POST)
+
+        if form.is_valid():
+
+            user = form.save(commit=False)
+
+            password = form.cleaned_data['password']
+            role = form.cleaned_data['role']
+
+            user.set_password(password)
+            user.save()
+
+            group = Group.objects.get(name=role)
+            user.groups.add(group)
+
+            messages.success(
+                request,
+                "User created successfully."
+            )
+
+            return redirect('superadmin_dashboard')
+
+    else:
+
+        form = UserCreateForm()
+
+    return render(
+        request,
+        'myapp/create_user.html',
+        {
+            'form': form
+        }
+    )
+
+@login_required
+def delete_user(request, user_id):
+
+    if not request.user.is_superuser:
+        messages.error(request, "Access Denied")
+        return redirect('home')
+
+    user_obj = get_object_or_404(User, id=user_id)
+
+    # Prevent self deletion
+    if user_obj == request.user:
+        messages.error(
+            request,
+            "You cannot delete your own account."
+        )
+        return redirect('superadmin_dashboard')
+
+    user_obj.delete()
+
+    messages.success(
+        request,
+        "User deleted successfully."
+    )
+
+    return redirect('superadmin_dashboard')

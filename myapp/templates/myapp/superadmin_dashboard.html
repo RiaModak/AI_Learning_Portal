@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Super Admin Dashboard</title>
+
+    <style>
+        .container{
+            width:90%;
+            margin:auto;
+        }
+
+        .cards{
+            display:flex;
+            gap:20px;
+            flex-wrap:wrap;
+        }
+
+        .card{
+            padding:20px;
+            border-radius:10px;
+            border:1px solid #ddd;
+            min-width:200px;
+            text-align:center;
+        }
+
+        .card h2{
+            margin:0;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+    
+    <h1>AI Learning Portal - Super Admin</h1>
+
+    <p>
+    Welcome {{ request.user.username }}
+    |
+    <a href="{% url 'logout' %}">
+        Logout
+    </a>
+</p>
+    {% if messages %}
+    {% for message in messages %}
+        <div style="
+            padding:10px;
+            margin-bottom:10px;
+            border:1px solid green;
+            background:#d4edda;
+        ">
+            {{ message }}
+        </div>
+    {% endfor %}
+{% endif %}
+    <div class="cards">
+
+        <div class="card">
+            <h2>{{ total_users }}</h2>
+            <p>Total Users</p>
+        </div>
+
+        <div class="card">
+            <h2>{{ total_teachers }}</h2>
+            <p>Teachers</p>
+        </div>
+
+        <div class="card">
+            <h2>{{ total_students }}</h2>
+            <p>Students</p>
+        </div>
+
+        <div class="card">
+            <h2>{{ total_courses }}</h2>
+            <p>Courses</p>
+        </div>
+
+        <div class="card">
+            <h2>{{ total_assignments }}</h2>
+            <p>Assignments</p>
+        </div>
+
+        <div class="card">
+            <h2>{{ total_tests }}</h2>
+            <p>Tests</p>
+        </div>
+
+    </div>
+    <h2>All Users</h2>
+<form method="GET">
+
+    <input type="text"
+           name="search"
+           placeholder="Search users..."
+           value="{{ search }}">
+
+    <select name="role">
+        <option value="">All Roles</option>
+        <option value="Admin">Admin</option>
+        <option value="Teacher">Teacher</option>
+        <option value="Student">Student</option>
+    </select>
+
+    <select name="status">
+        <option value="">All Status</option>
+        <option value="active">Active</option>
+        <option value="inactive">Inactive</option>
+    </select>
+
+    <button type="submit">
+        Filter
+    </button>
+
+</form>
+
+<br>
+<table border="1" cellpadding="10">
+
+    <tr>
+        <th>ID</th>
+        <th>Username</th>
+        <th>Name</th>
+        <th>Email</th>
+        <th>Role</th>
+        <th>Active</th>
+        <th>Actions</th>
+    </tr>
+
+    {% for user in users %}
+    <tr>
+
+        <td>{{ user.id }}</td>
+
+        <td>
+        <a href="{% url 'user_detail' user.id %}">
+            {{ user.username }}
+        </a>
+        </td>
+
+        <td>
+            {{ user.first_name }}
+            {{ user.last_name }}
+        </td>
+
+        <td>{{ user.email }}</td>
+
+        <td>
+            {% for group in user.groups.all %}
+                {{ group.name }}
+            {% empty %}
+                No Role
+            {% endfor %}
+        </td>
+
+        <td>
+            {% if user.is_active %}
+                Active
+            {% else %}
+                Inactive
+            {% endif %}
+        </td>
+        <td>
+
+    <a href="{% url 'user_detail' user.id %}">
+        View
+    </a>
+
+    |
+
+    <a href="{% url 'edit_user' user.id %}">
+        Edit
+    </a>
+
+    |
+
+    <a href="{% url 'delete_user' user.id %}"
+        onclick="return confirm('Delete {{ user.username }} ?');">
+        Delete
+    </a>
+</td>
+    </tr>
+    {% endfor %}
+
+</table>
+</div>
+
+</body>
+</html>
