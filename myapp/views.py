@@ -1000,3 +1000,36 @@ def delete_user(request, user_id):
     )
 
     return redirect('superadmin_dashboard')
+
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from django.contrib.auth.models import User
+
+from .serializers import UserSerializer
+@api_view(['GET'])
+def users_api(request):
+
+    users = User.objects.all()
+
+    serializer = UserSerializer(
+        users,
+        many=True
+    )
+
+    return Response(serializer.data)
+
+# views.py
+
+from django.contrib.auth.models import User
+from django.http import JsonResponse
+from .models import Course, Assignment, Test
+
+def dashboard_stats(request):
+    return JsonResponse({
+        "total_users": User.objects.count(),
+        "teachers": User.objects.filter(groups__name="Teacher").count(),
+        "students": User.objects.filter(groups__name="Student").count(),
+        "courses": Course.objects.count(),
+        "assignments": Assignment.objects.count(),
+        "tests": Test.objects.count(),
+    })
