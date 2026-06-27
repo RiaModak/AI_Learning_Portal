@@ -1006,17 +1006,21 @@ from rest_framework.response import Response
 from django.contrib.auth.models import User
 
 from .serializers import UserSerializer
-@api_view(['GET'])
+@api_view(["GET", "POST"])
 def users_api(request):
 
-    users = User.objects.all()
+    if request.method == "GET":
+        users = User.objects.all()
+        serializer = UserSerializer(users, many=True)
+        return Response(serializer.data)
 
-    serializer = UserSerializer(
-        users,
-        many=True
-    )
+    serializer = UserSerializer(data=request.data)
 
-    return Response(serializer.data)
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data, status=201)
+
+    return Response(serializer.errors, status=400)
 
 # views.py
 
