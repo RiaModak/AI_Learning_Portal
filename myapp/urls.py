@@ -22,7 +22,7 @@ urlpatterns = [
     path('superadmin/user/<int:user_id>/edit/',views.edit_user,name='edit_user'),
     path('superadmin/create-user/',views.create_user,name='create_user'),
     path('superadmin/user/<int:user_id>/delete/',views.delete_user,name='delete_user'),
-    path(
+path(
     'api/users/',
     views.users_api,
     name='users_api'
@@ -30,5 +30,9 @@ urlpatterns = [
 path(
     "api/dashboard-stats/",
     views.dashboard_stats
+),
+path(
+    "api/users/<int:pk>/",
+    views.user_detail_api,
 ),
 ]

@@ -1037,3 +1037,13 @@ def dashboard_stats(request):
         "assignments": Assignment.objects.count(),
         "tests": Test.objects.count(),
     })
+
+@api_view(["GET"])
+def user_detail_api(request, pk):
+    try:
+        user = User.objects.get(pk=pk)
+    except User.DoesNotExist:
+        return Response(status=404)
+
+    serializer = UserSerializer(user)
+    return Response(serializer.data)

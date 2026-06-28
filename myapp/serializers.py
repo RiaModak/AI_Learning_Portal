@@ -21,6 +21,7 @@ class UserSerializer(serializers.ModelSerializer):
             "is_active",
             "role",
             "role_name",
+            "date_joined",
         ]
 
     def get_role_name(self, obj):

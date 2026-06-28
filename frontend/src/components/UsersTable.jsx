@@ -57,7 +57,7 @@ function UsersTable() {
       user.email.toLowerCase().includes(search.toLowerCase());
 
     const matchesRole =
-      role === "" || user.role === role;
+      role === "" || user.role_name === role;
 
     const matchesStatus =
       status === "" ||
@@ -227,14 +227,14 @@ function UsersTable() {
 
                     <span
                       className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                        user.role === "Admin"
+                        user.role_name === "Admin"
                           ? "bg-purple-100 text-purple-700"
-                          : user.role === "Teacher"
+                          : user.role_name === "Teacher"
                           ? "bg-blue-100 text-blue-700"
                           : "bg-green-100 text-green-700"
                       }`}
                     >
-                      {user.role}
+                      {user.role_name}
                     </span>
 
                   </td>
