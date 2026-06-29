@@ -42,3 +42,49 @@ class UserSerializer(serializers.ModelSerializer):
         user.groups.add(group)
 
         return user
+    def update(self, instance, validated_data):
+
+        role = validated_data.pop("role", None)
+        password = validated_data.pop("password", None)
+
+        instance.username = validated_data.get(
+            "username",
+            instance.username
+        )
+
+        instance.first_name = validated_data.get(
+            "first_name",
+            instance.first_name
+        )
+
+        instance.last_name = validated_data.get(
+            "last_name",
+            instance.last_name
+        )
+
+        instance.email = validated_data.get(
+            "email",
+            instance.email
+        )
+
+        instance.is_active = validated_data.get(
+            "is_active",
+            instance.is_active
+        )
+
+        if password:
+            instance.set_password(password)
+
+        instance.save()
+
+        if role:
+
+            instance.groups.clear()
+
+            group, created = Group.objects.get_or_create(
+                name=role
+            )
+
+            instance.groups.add(group)
+
+        return instance

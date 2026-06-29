@@ -1038,12 +1038,29 @@ def dashboard_stats(request):
         "tests": Test.objects.count(),
     })
 
-@api_view(["GET"])
+@api_view(["GET", "PUT"])
 def user_detail_api(request, pk):
+
     try:
         user = User.objects.get(pk=pk)
     except User.DoesNotExist:
         return Response(status=404)
 
-    serializer = UserSerializer(user)
-    return Response(serializer.data)
+    if request.method == "GET":
+        serializer = UserSerializer(user)
+        return Response(serializer.data)
+
+    serializer = UserSerializer(
+        user,
+        data=request.data,
+        partial=True
+    )
+
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data)
+
+    return Response(
+        serializer.errors,
+        status=400
+    )
