@@ -35,4 +35,8 @@ path(
     "api/users/<int:pk>/",
     views.user_detail_api,
 ),
+path(
+    "api/users/delete/<int:pk>/",
+    views.delete_user_api,
+),
 ]

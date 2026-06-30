@@ -37,7 +37,31 @@ function UsersTable() {
       setLoading(false);
     }
   };
+    const deleteUser = async (id) => {
 
+    const confirmDelete = window.confirm(
+      "Delete this user?"
+    );
+
+    if (!confirmDelete) return;
+
+    try {
+
+      await axios.delete(
+        `http://127.0.0.1:8000/api/users/delete/${id}/`
+      );
+
+      fetchUsers();
+
+    } catch (error) {
+
+      console.log(error);
+
+      alert("Delete failed");
+
+    }
+
+  };
   if (loading) {
     return (
       <div className="bg-white p-6 rounded-xl shadow-sm border mt-6">
@@ -273,8 +297,11 @@ function UsersTable() {
                         <Pencil size={16}/>
                       </Link>
 
-                      <button className="p-2 rounded-lg text-red-600 hover:bg-red-100">
-                        <Trash2 size={16}/>
+                      <button
+                        onClick={() => deleteUser(user.id)}
+                        className="p-2 rounded-lg text-red-600 hover:bg-red-100"
+                      >
+                        <Trash2 size={16} />
                       </button>
 
                     </div>

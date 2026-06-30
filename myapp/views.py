@@ -1064,3 +1064,17 @@ def user_detail_api(request, pk):
         serializer.errors,
         status=400
     )
+
+@api_view(["DELETE"])
+def delete_user_api(request, pk):
+
+    try:
+        user = User.objects.get(pk=pk)
+    except User.DoesNotExist:
+        return Response(status=404)
+
+    user.delete()
+
+    return Response(
+        {"message": "User deleted successfully"}
+    )
