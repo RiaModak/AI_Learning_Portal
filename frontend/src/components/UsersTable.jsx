@@ -9,7 +9,7 @@ import {
   ChevronDown
 } from "lucide-react";
 
-function UsersTable() {
+function UsersTable({ onRefresh })  {
 
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -52,6 +52,7 @@ function UsersTable() {
       );
 
       fetchUsers();
+      onRefresh();
 
     } catch (error) {
 

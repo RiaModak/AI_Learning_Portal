@@ -1,9 +1,13 @@
+import { useState } from "react";
+
 import Sidebar from "../components/Sidebar";
 import Topbar from "../components/Topbar";
 import StatsCards from "../components/StatsCards";
 import UsersTable from "../components/UsersTable";
 
 function SuperAdminDashboard() {
+
+  const [refreshKey, setRefreshKey] = useState(0);
 
   return (
     <div className="flex">
@@ -24,9 +28,13 @@ function SuperAdminDashboard() {
             AI Learning Portal Dashboard
           </p>
 
-          <StatsCards />
+          <StatsCards key={refreshKey} />
 
-          <UsersTable />
+          <UsersTable
+            onRefresh={() =>
+              setRefreshKey(prev => prev + 1)
+            }
+          />
 
         </div>
 
