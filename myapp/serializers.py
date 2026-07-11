@@ -1,6 +1,10 @@
 from django.contrib.auth.models import User, Group
 from rest_framework import serializers
-from .models import Course
+from .models import (
+    Course,
+    Assignment,
+    TestSourceDocument
+)
 
 class UserSerializer(serializers.ModelSerializer):
 
@@ -113,3 +117,43 @@ class CourseSerializer(serializers.ModelSerializer):
             "teachers",
         ]
 
+class AssignmentSerializer(serializers.ModelSerializer):
+
+    course_name = serializers.CharField(
+        source="course.name",
+        read_only=True
+    )
+
+    class Meta:
+        model = Assignment
+
+        fields = [
+            "id",
+            "title",
+            "description",
+            "due_date",
+            "assignment_file",
+            "course",
+            "course_name",
+            "created_at",
+        ]
+
+class TestSourceDocumentSerializer(serializers.ModelSerializer):
+
+    course_name = serializers.CharField(
+        source="course.name",
+        read_only=True
+    )
+
+    class Meta:
+        model = TestSourceDocument
+
+        fields = [
+            "id",
+            "title",
+            "course",
+            "course_name",
+            "uploaded_file",
+            "uploaded_at",
+            "qna_id",
+        ]

@@ -63,5 +63,40 @@ path(
     "api/remove-teacher/",
     views.remove_teacher,
 ),
-
+path(
+    "api/teacher/courses/",
+    views.teacher_courses,
+),
+path(
+    "api/teacher/dashboard-stats/",
+    views.teacher_dashboard_stats,
+),
+path(
+    "api/teacher/assignments/",
+    views.teacher_assignments,
+),
+path(
+    "api/teacher/assignments/create/",
+    views.create_assignment,
+),
+path(
+    "api/teacher/assignments/<int:pk>/",
+    views.delete_assignment,
+),
+path(
+    "api/teacher/ai-tests/",
+    views.teacher_ai_tests,
+),
+path(
+    "api/teacher/upload-ai-test/",
+    views.upload_ai_test,
+),
+path(
+    "api/teacher/generated-questions/<int:pk>/",
+    views.generated_questions,
+),
+path(
+    "api/teacher/ai-tests/<int:pk>/",
+    views.delete_ai_test,
+),
 ]

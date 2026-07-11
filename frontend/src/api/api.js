@@ -42,3 +42,12 @@ export const assignTeacher = (data) =>
 
 export const removeTeacher = (data) =>
     API.post("remove-teacher/", data);
+
+export const getTeacherCourses = () =>
+    API.get("teacher/courses/");
+
+export const getTeacherDashboardStats = () =>
+    API.get("teacher/dashboard-stats/");
+
+export const getGeneratedQuestions = (docId) =>
+    API.get(`teacher/generated-questions/${docId}/`);

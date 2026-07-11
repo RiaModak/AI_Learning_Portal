@@ -1084,8 +1084,11 @@ def delete_user_api(request, pk):
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
-
-from .serializers import CourseSerializer
+from .serializers import (
+    CourseSerializer,
+    AssignmentSerializer,
+    TestSourceDocumentSerializer
+)
 from .models import Course
 @api_view(["GET", "POST"])
 def course_list(request):
@@ -1231,4 +1234,254 @@ def remove_teacher(request):
     return Response(
         {"message": "Teacher removed successfully"}
     )
+
+@api_view(["GET"])
+def teacher_courses(request):
+
+    teacher = User.objects.filter(
+        groups__name="Teacher"
+    ).first()
+
+    courses = teacher.courses.all()
+
+    serializer = CourseSerializer(
+        courses,
+        many=True
+    )
+
+    return Response(serializer.data)
+
+@api_view(["GET"])
+def teacher_dashboard_stats(request):
+
+    teacher = User.objects.filter(
+        groups__name="Teacher"
+    ).first()
+
+    courses = teacher.courses.all()
+
+    assignments = Assignment.objects.filter(
+        teacher=teacher
+    )
+
+    ai_tests = TestSourceDocument.objects.filter(
+        teacher=teacher
+    )
+
+    return Response({
+        "courses": courses.count(),
+        "assignments": assignments.count(),
+        "ai_tests": ai_tests.count(),
+    })
+
+@api_view(["GET"])
+def teacher_assignments(request):
+
+    teacher = User.objects.filter(
+        groups__name="Teacher"
+    ).first()
+
+    assignments = Assignment.objects.filter(
+        teacher=teacher
+    )
+
+    serializer = AssignmentSerializer(
+        assignments,
+        many=True
+    )
+
+    return Response(serializer.data)
+@api_view(["POST"])
+def create_assignment(request):
+
+    teacher = User.objects.filter(
+        groups__name="Teacher"
+    ).first()
+
+    data = request.data.copy()
+
+    data["teacher"] = teacher.id
+
+    serializer = AssignmentSerializer(data=data)
+
+    if serializer.is_valid():
+
+        serializer.save()
+
+        return Response(
+            serializer.data,
+            status=status.HTTP_201_CREATED
+        )
+
+    return Response(
+        serializer.errors,
+        status=status.HTTP_400_BAD_REQUEST
+    )
+
+@api_view(["DELETE"])
+def delete_assignment(request, pk):
+
+    teacher = User.objects.filter(
+        groups__name="Teacher"
+    ).first()
+
+    try:
+        assignment = Assignment.objects.get(
+            pk=pk,
+            teacher=teacher
+        )
+
+    except Assignment.DoesNotExist:
+        return Response(
+            {"error": "Assignment not found"},
+            status=status.HTTP_404_NOT_FOUND
+        )
+
+    if assignment.assignment_file:
+        assignment.assignment_file.delete(save=False)
+
+    assignment.delete()
+
+    return Response({
+        "message": "Assignment deleted successfully"
+    })
+
+@api_view(["GET"])
+def teacher_ai_tests(request):
+
+    teacher = User.objects.filter(
+        groups__name="Teacher"
+    ).first()
+
+    docs = TestSourceDocument.objects.filter(
+        teacher=teacher
+    )
+
+    serializer = TestSourceDocumentSerializer(
+        docs,
+        many=True
+    )
+
+    return Response(serializer.data)
+
+@api_view(["POST"])
+def upload_ai_test(request):
+
+    teacher = User.objects.filter(
+        groups__name="Teacher"
+    ).first()
+
+    data = request.data.copy()
+
+    data["teacher"] = teacher.id
+
+    serializer = TestSourceDocumentSerializer(
+        data=data
+    )
+
+    if serializer.is_valid():
+
+        serializer.save()
+
+        return Response(
+            serializer.data,
+            status=status.HTTP_201_CREATED
+        )
+
+    return Response(
+        serializer.errors,
+        status=status.HTTP_400_BAD_REQUEST
+    )
+
+@api_view(["DELETE"])
+def delete_ai_test(request, pk):
+
+    teacher = User.objects.filter(
+        groups__name="Teacher"
+    ).first()
+
+    try:
+
+        doc = TestSourceDocument.objects.get(
+            pk=pk,
+            teacher=teacher
+        )
+
+    except TestSourceDocument.DoesNotExist:
+
+        return Response(
+            {"error": "Document not found"},
+            status=status.HTTP_404_NOT_FOUND
+        )
+
+    if doc.uploaded_file:
+        doc.uploaded_file.delete(save=False)
+
+    doc.delete()
+
+    return Response({
+        "message": "AI Test deleted successfully"
+    })
+
+@api_view(["GET"])
+def generated_questions(request, doc_id):
+
+    teacher = User.objects.filter(
+        groups__name="Teacher"
+    ).first()
+
+    try:
+        doc = TestSourceDocument.objects.get(
+            id=doc_id,
+            teacher=teacher
+        )
+
+    except TestSourceDocument.DoesNotExist:
+        return Response(
+            {"error": "Document not found"},
+            status=status.HTTP_404_NOT_FOUND
+        )
+
+    try:
+
+        response = requests.get(
+            f"http://127.0.0.1:8001/questions/{doc.qna_id}"
+        )
+
+        if response.status_code != 200:
+            return Response(
+                {"error": "Failed to fetch generated questions"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+        questions = response.json()
+
+        mcqs = [
+            q for q in questions
+            if q["type"] == "mcq"
+        ]
+
+        long_answers = [
+            q for q in questions
+            if q["type"] == "short"
+        ]
+
+        for q in long_answers:
+            if "answer" not in q:
+                q["answer"] = q.pop(
+                    "answer_text",
+                    ""
+                )
+
+        return Response({
+            "mcqs": mcqs,
+            "long_answers": long_answers
+        })
+
+    except Exception as e:
+
+        return Response(
+            {"error": str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
 
