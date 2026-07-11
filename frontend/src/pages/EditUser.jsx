@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+import { updateUser } from "../api/api";
 import { Link, useNavigate, useParams } from "react-router-dom";
 
 function EditUser() {
@@ -24,9 +24,7 @@ function EditUser() {
 
   const fetchUser = async () => {
     try {
-      const response = await axios.get(
-        `http://127.0.0.1:8000/api/users/${id}/`
-      );
+      getUser(id);
 
       setForm({
         username: response.data.username,
@@ -66,10 +64,7 @@ function EditUser() {
         delete data.password;
       }
 
-      await axios.put(
-        `http://127.0.0.1:8000/api/users/${id}/`,
-        data
-      );
+      updateUser(id, formData);
 
       alert("User updated successfully.");
 

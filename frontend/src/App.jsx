@@ -4,7 +4,7 @@ import SuperAdminDashboard from "./pages/SuperAdminDashboard";
 import CreateUser from "./pages/CreateUser";
 import ViewUser from "./pages/ViewUser";
 import EditUser from "./pages/EditUser";
-
+import AdminDashboard from "./pages/AdminDashboard";
 function App() {
   return (
     <BrowserRouter>
@@ -13,6 +13,10 @@ function App() {
         <Route path="/create-user" element={<CreateUser />} />
         <Route path="/view-user/:id" element={<ViewUser />} />
         <Route path="/edit-user/:id" element={<EditUser />} />
+        <Route
+    path="/admin"
+    element={<AdminDashboard />}
+/>
       </Routes>
     </BrowserRouter>
   );

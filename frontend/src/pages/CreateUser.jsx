@@ -1,5 +1,5 @@
 import { useState } from "react";
-import axios from "axios";
+import { createUser } from "../api/api";
 import { Link, useNavigate } from "react-router-dom";
 
 function CreateUser() {
@@ -30,10 +30,7 @@ function CreateUser() {
     e.preventDefault();
 
     try {
-      await axios.post(
-        "http://127.0.0.1:8000/api/users/",
-        form
-      );
+      await createUser(formData);
 
       setMessage("User created successfully!");
 

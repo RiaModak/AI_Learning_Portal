@@ -39,4 +39,25 @@ path(
     "api/users/delete/<int:pk>/",
     views.delete_user_api,
 ),
+path(
+    "api/courses/",
+    views.course_list,
+),
+path(
+    "api/courses/<int:pk>/",
+    views.delete_course,
+),
+path(
+    "api/teachers/",
+    views.teacher_list,
+),
+path(
+    "api/assign-teacher/",
+    views.assign_teacher,
+),
+path(
+    "api/remove-teacher/",
+    views.remove_teacher,
+),
+
 ]

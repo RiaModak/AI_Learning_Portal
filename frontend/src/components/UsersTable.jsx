@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
+import { getUsers, deleteUser } from "../api/api";
 import { Link } from "react-router-dom";
 import {
   Search,
@@ -24,9 +24,7 @@ function UsersTable({ onRefresh })  {
 
   const fetchUsers = async () => {
     try {
-      const response = await axios.get(
-        "http://127.0.0.1:8000/api/users/"
-      );
+     const response = await getUsers();
 
       setUsers(response.data);
 
@@ -47,9 +45,7 @@ function UsersTable({ onRefresh })  {
 
     try {
 
-      await axios.delete(
-        `http://127.0.0.1:8000/api/users/delete/${id}/`
-      );
+      await deleteUser(id);
 
       fetchUsers();
       onRefresh();
@@ -174,7 +170,17 @@ function UsersTable({ onRefresh })  {
             <option value="active">Active</option>
             <option value="inactive">Inactive</option>
           </select>
-
+          
+          <button
+            onClick={() => {
+              setSearch("");
+              setRole("");
+              setStatus("");
+            }}
+            className="px-4 py-2 rounded-lg border bg-white hover:bg-slate-100 font-medium">
+            Clear Filters
+          </button>
+          
           <ChevronDown
             size={15}
             className="absolute right-3 top-3 text-slate-400"

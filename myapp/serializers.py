@@ -1,6 +1,6 @@
 from django.contrib.auth.models import User, Group
 from rest_framework import serializers
-
+from .models import Course
 
 class UserSerializer(serializers.ModelSerializer):
 
@@ -88,3 +88,28 @@ class UserSerializer(serializers.ModelSerializer):
             instance.groups.add(group)
 
         return instance
+    
+class TeacherSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = User
+        fields = [
+            "id",
+            "username"
+        ]
+class CourseSerializer(serializers.ModelSerializer):
+
+    teachers = TeacherSerializer(
+        many=True,
+        read_only=True
+    )
+
+    class Meta:
+        model = Course
+        fields = [
+            "id",
+            "name",
+            "description",
+            "teachers",
+        ]
+

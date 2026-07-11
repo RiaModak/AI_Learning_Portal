@@ -1001,6 +1001,8 @@ def delete_user(request, user_id):
 
     return redirect('superadmin_dashboard')
 
+
+
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from django.contrib.auth.models import User
@@ -1078,3 +1080,135 @@ def delete_user_api(request, pk):
     return Response(
         {"message": "User deleted successfully"}
     )
+
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from rest_framework import status
+
+from .serializers import CourseSerializer
+from .models import Course
+@api_view(["GET", "POST"])
+def course_list(request):
+
+    if request.method == "GET":
+
+        courses = Course.objects.all()
+
+        serializer = CourseSerializer(
+            courses,
+            many=True
+        )
+
+        return Response(serializer.data)
+
+    if request.method == "POST":
+
+        serializer = CourseSerializer(
+            data=request.data
+        )
+
+        if serializer.is_valid():
+
+            serializer.save()
+
+            return Response(
+                serializer.data,
+                status=status.HTTP_201_CREATED
+            )
+
+        return Response(
+            serializer.errors,
+            status=status.HTTP_400_BAD_REQUEST
+        )
+@api_view(["DELETE"])
+def delete_course(request, pk):
+
+    try:
+        course = Course.objects.get(pk=pk)
+
+    except Course.DoesNotExist:
+        return Response(
+            {"error": "Course not found"},
+            status=404
+        )
+
+    course.delete()
+
+    return Response(
+        {"message": "Course deleted successfully"}
+    )
+@api_view(["GET"])
+def teacher_list(request):
+
+    teachers = User.objects.filter(
+        groups__name="Teacher"
+    )
+
+    serializer = UserSerializer(
+        teachers,
+        many=True
+    )
+
+    return Response(serializer.data)
+@api_view(["POST"])
+def assign_teacher(request):
+
+    teacher_id = request.data.get("teacher_id")
+    course_id = request.data.get("course_id")
+
+    try:
+        teacher = User.objects.get(id=teacher_id)
+        course = Course.objects.get(id=course_id)
+
+    except User.DoesNotExist:
+        return Response(
+            {"error": "Teacher not found"},
+            status=status.HTTP_404_NOT_FOUND
+        )
+
+    except Course.DoesNotExist:
+        return Response(
+            {"error": "Course not found"},
+            status=status.HTTP_404_NOT_FOUND
+        )
+
+    if teacher in course.teachers.all():
+
+        return Response(
+            {"message": "Teacher already assigned"},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    course.teachers.add(teacher)
+
+    return Response(
+        {"message": "Teacher assigned successfully"}
+    )
+@api_view(["POST"])
+def remove_teacher(request):
+
+    teacher_id = request.data.get("teacher_id")
+    course_id = request.data.get("course_id")
+
+    try:
+        teacher = User.objects.get(id=teacher_id)
+        course = Course.objects.get(id=course_id)
+
+    except User.DoesNotExist:
+        return Response(
+            {"error": "Teacher not found"},
+            status=status.HTTP_404_NOT_FOUND
+        )
+
+    except Course.DoesNotExist:
+        return Response(
+            {"error": "Course not found"},
+            status=status.HTTP_404_NOT_FOUND
+        )
+
+    course.teachers.remove(teacher)
+
+    return Response(
+        {"message": "Teacher removed successfully"}
+    )
+

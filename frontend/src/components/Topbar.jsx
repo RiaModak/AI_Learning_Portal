@@ -1,34 +1,52 @@
-import { Bell, Plus } from "lucide-react";
+import { LogOut, Bell } from "lucide-react";
 
 function Topbar() {
-  return (
-    <header className="h-16 bg-white border-b flex items-center justify-between px-6">
 
-      <div>
-        <p className="text-sm text-slate-500">
-          Welcome back,
-        </p>
+    return (
 
-        <h2 className="font-semibold">
-          Super Admin
-        </h2>
-      </div>
+        <div className="bg-white shadow-sm border-b px-8 py-5 flex justify-between items-center">
 
-      <div className="flex items-center gap-4">
+            <div>
 
-        <button className="p-2 rounded hover:bg-slate-100">
-          <Bell size={18}/>
-        </button>
+                <h1 className="text-2xl font-bold">
+                    Welcome back 👋
+                </h1>
 
-        <button className="bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center gap-2">
-          <Plus size={16}/>
-          Create User
-        </button>
+                <p className="text-slate-500">
+                    Super Administrator
+                </p>
 
-      </div>
+            </div>
 
-    </header>
-  );
+            <div className="flex items-center gap-5">
+
+                <Bell
+                    size={22}
+                    className="text-slate-500 cursor-pointer"
+                />
+
+                <div className="text-right">
+
+                    <p className="text-sm text-slate-500">
+                        Super Admin
+                    </p>
+
+                </div>
+
+                <button className="flex items-center gap-2 bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg">
+
+                    <LogOut size={18} />
+
+                    Logout
+
+                </button>
+
+            </div>
+
+        </div>
+
+    );
+
 }
 
 export default Topbar;

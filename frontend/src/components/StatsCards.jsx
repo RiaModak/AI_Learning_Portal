@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+import { getDashboardStats } from "../api/api";
 
 import {
   Users,
@@ -18,11 +18,12 @@ function StatsCards() {
   }, []);
 
   const fetchStats = async () => {
-    const response = await axios.get(
-      "http://127.0.0.1:8000/api/dashboard-stats/"
-    );
-
-    setStats(response.data);
+    try {
+      const response = await getDashboardStats();
+      setStats(response.data);
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   if (!stats) {
