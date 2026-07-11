@@ -1137,6 +1137,26 @@ def delete_course(request, pk):
     return Response(
         {"message": "Course deleted successfully"}
     )
+
+@api_view(["PUT"])
+def update_course(request, pk):
+
+    try:
+        course = Course.objects.get(pk=pk)
+    except Course.DoesNotExist:
+        return Response(status=404)
+
+    serializer = CourseSerializer(
+        course,
+        data=request.data
+    )
+
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data)
+
+    return Response(serializer.errors, status=400)
+
 @api_view(["GET"])
 def teacher_list(request):
 

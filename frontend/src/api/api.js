@@ -31,6 +31,9 @@ export const createCourse = (data) =>
 export const deleteCourse = (id) =>
     API.delete(`courses/${id}/`);
 
+export const updateCourse = (id, data) =>
+    API.put(`courses/update/${id}/`, data);
+
 export const getTeachers = () =>
     API.get("teachers/");
 

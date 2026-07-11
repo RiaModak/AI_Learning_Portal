@@ -34,7 +34,7 @@ function CourseTeachers({ courses, fetchCourses }) {
                 <span>{teacher.username}</span>
                 <button
                                     onClick={() =>
-                                        handleDelete(course.id)
+                                        handleRemove(teacher.id, course.id)
                                     }
                                     className="text-red-600 hover:text-red-800"
                                 >

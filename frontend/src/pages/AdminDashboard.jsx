@@ -11,13 +11,13 @@ import CourseTeachers from "../components/admin/CourseTeachers";
 import { getCourses } from "../api/api";
 function AdminDashboard() {
     const [courses, setCourses] = useState([]);
-    const fetchCourses = async () => {
+    const [search, setSearch] = useState("");
+  const [editingCourse, setEditingCourse] = useState(null); // ✅ move this OUTSIDE fetchCourses
 
+  const fetchCourses = async () => {
     const response = await getCourses();
-
     setCourses(response.data);
-
-};
+  };
 useEffect(() => {
 
     fetchCourses();
@@ -44,7 +44,13 @@ useEffect(() => {
                     </p>
 
                     <CourseForm
+
     fetchCourses={fetchCourses}
+
+    editingCourse={editingCourse}
+
+    setEditingCourse={setEditingCourse}
+
 />
 
                     <CoursesTable

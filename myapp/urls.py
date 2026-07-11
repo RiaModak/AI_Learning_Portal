@@ -48,6 +48,10 @@ path(
     views.delete_course,
 ),
 path(
+    "api/courses/update/<int:pk>/",
+    views.update_course,
+),
+path(
     "api/teachers/",
     views.teacher_list,
 ),
