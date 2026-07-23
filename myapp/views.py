@@ -1,3 +1,5 @@
+from pydoc import doc
+
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
@@ -1273,40 +1275,39 @@ def teacher_dashboard_stats(request):
         "assignments": assignments.count(),
         "ai_tests": ai_tests.count(),
     })
-
-@api_view(["GET"])
+@api_view(["GET", "POST"])
 def teacher_assignments(request):
 
     teacher = User.objects.filter(
         groups__name="Teacher"
     ).first()
 
-    assignments = Assignment.objects.filter(
-        teacher=teacher
-    )
+    # ---------------- GET ----------------
+
+    if request.method == "GET":
+
+        assignments = Assignment.objects.filter(
+            teacher=teacher
+        )
+
+        serializer = AssignmentSerializer(
+            assignments,
+            many=True
+        )
+
+        return Response(serializer.data)
+
+# ---------------- POST ----------------
 
     serializer = AssignmentSerializer(
-        assignments,
-        many=True
+        data=request.data
     )
-
-    return Response(serializer.data)
-@api_view(["POST"])
-def create_assignment(request):
-
-    teacher = User.objects.filter(
-        groups__name="Teacher"
-    ).first()
-
-    data = request.data.copy()
-
-    data["teacher"] = teacher.id
-
-    serializer = AssignmentSerializer(data=data)
 
     if serializer.is_valid():
 
-        serializer.save()
+        serializer.save(
+            teacher=teacher
+        )
 
         return Response(
             serializer.data,
@@ -1346,52 +1347,94 @@ def delete_assignment(request, pk):
         "message": "Assignment deleted successfully"
     })
 
-@api_view(["GET"])
+@api_view(["GET", "POST"])
 def teacher_ai_tests(request):
 
     teacher = User.objects.filter(
         groups__name="Teacher"
     ).first()
 
-    docs = TestSourceDocument.objects.filter(
-        teacher=teacher
-    )
+    # ---------------- GET ----------------
 
-    serializer = TestSourceDocumentSerializer(
-        docs,
-        many=True
-    )
+    if request.method == "GET":
 
-    return Response(serializer.data)
-
-@api_view(["POST"])
-def upload_ai_test(request):
-
-    teacher = User.objects.filter(
-        groups__name="Teacher"
-    ).first()
-
-    data = request.data.copy()
-
-    data["teacher"] = teacher.id
-
-    serializer = TestSourceDocumentSerializer(
-        data=data
-    )
-
-    if serializer.is_valid():
-
-        serializer.save()
-
-        return Response(
-            serializer.data,
-            status=status.HTTP_201_CREATED
+        docs = TestSourceDocument.objects.filter(
+            teacher=teacher
         )
 
-    return Response(
-        serializer.errors,
-        status=status.HTTP_400_BAD_REQUEST
+        serializer = TestSourceDocumentSerializer(
+            docs,
+            many=True
+        )
+
+        return Response(serializer.data)
+
+    # ---------------- POST ----------------
+
+    serializer = TestSourceDocumentSerializer(
+        data=request.data
     )
+
+    if not serializer.is_valid():
+
+        return Response(
+            serializer.errors,
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    # Save document first
+    doc = serializer.save(
+        teacher=teacher
+    )
+    print("Document saved:", doc.id)
+    print("Path:", doc.uploaded_file.path)
+    try:
+
+        # Send uploaded file to FastAPI
+        with open(doc.uploaded_file.path, "rb") as f:
+
+            response = requests.post(
+                "http://127.0.0.1:8001/generate-questions/",
+                files={
+                    "file": (
+                        doc.uploaded_file.name,
+                        f,
+                        "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                    )
+                },
+            )
+            print("Status:", response.status_code)
+            print("Response:", response.text)
+
+        if response.status_code != 200:
+
+            return Response(
+                {
+                    "error": "FastAPI question generation failed",
+                    "details": response.text,
+                },
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
+        result = response.json()
+        print(result)
+        # Save qna_id
+        doc.qna_id = result.get("saved_id")
+        doc.save()
+
+        return Response(
+            TestSourceDocumentSerializer(doc).data,
+            status=status.HTTP_201_CREATED,
+        )
+
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+
+        return Response(
+            {"error": str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )
 
 @api_view(["DELETE"])
 def delete_ai_test(request, pk):
@@ -1444,9 +1487,15 @@ def generated_questions(request, doc_id):
 
     try:
 
+        print("Document ID:", doc.id)
+        print("QNA ID:", doc.qna_id)
+
         response = requests.get(
             f"http://127.0.0.1:8001/questions/{doc.qna_id}"
         )
+
+        print("FastAPI Status:", response.status_code)
+        print("FastAPI Response:", response.text)
 
         if response.status_code != 200:
             return Response(

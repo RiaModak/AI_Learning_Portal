@@ -49,5 +49,31 @@ export const getTeacherCourses = () =>
 export const getTeacherDashboardStats = () =>
     API.get("teacher/dashboard-stats/");
 
+export const getTeacherAssignments = () =>
+    API.get("teacher/assignments/");
+
+export const createAssignment = (data) =>
+    API.post("teacher/assignments/", data, {
+        headers: {
+            "Content-Type": "multipart/form-data",
+        },
+    });
+
+export const deleteAssignment = (id) =>
+    API.delete(`teacher/assignments/${id}/`);
+
+export const getAITests = () =>
+    API.get("teacher/ai-tests/");
+
+export const uploadAITest = (data) =>
+    API.post("teacher/ai-tests/", data, {
+        headers: {
+            "Content-Type": "multipart/form-data",
+        },
+    });
+
+export const deleteAITest = (id) =>
+    API.delete(`teacher/ai-tests/${id}/`);
+
 export const getGeneratedQuestions = (docId) =>
     API.get(`teacher/generated-questions/${docId}/`);

@@ -76,10 +76,6 @@ path(
     views.teacher_assignments,
 ),
 path(
-    "api/teacher/assignments/create/",
-    views.create_assignment,
-),
-path(
     "api/teacher/assignments/<int:pk>/",
     views.delete_assignment,
 ),
@@ -88,11 +84,7 @@ path(
     views.teacher_ai_tests,
 ),
 path(
-    "api/teacher/upload-ai-test/",
-    views.upload_ai_test,
-),
-path(
-    "api/teacher/generated-questions/<int:pk>/",
+    "api/teacher/generated-questions/<int:doc_id>/",
     views.generated_questions,
 ),
 path(

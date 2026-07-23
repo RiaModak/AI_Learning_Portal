@@ -12,7 +12,7 @@ import json
 from dotenv import load_dotenv
 
 load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), ".env"))
-
+print("API KEY =", os.getenv("GROQ_API_KEY"))
 client = Groq(api_key=os.getenv("GROQ_API_KEY"))
 
 # ---------------------------------------------------------
@@ -164,6 +164,14 @@ async def generate_questions(file: UploadFile = File(...), db: Session = Depends
         )
 
         generated = response.choices[0].message.content.strip()
+        print("\n===== GENERATED OUTPUT =====")
+        print(generated)
+        print("============================\n")
+        mcqs = parse_mcqs(generated)
+        shorts = parse_shorts(generated)
+
+        print("MCQs Parsed:", mcqs)
+        print("Shorts Parsed:", shorts)
 
         # Save base
         db_entry = QnaBase(original_text=text, generated_output=generated)

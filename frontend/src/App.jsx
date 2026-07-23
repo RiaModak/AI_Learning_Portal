@@ -6,6 +6,7 @@ import ViewUser from "./pages/ViewUser";
 import EditUser from "./pages/EditUser";
 import AdminDashboard from "./pages/AdminDashboard";
 import TeacherDashboard from './pages/TeacherDashboard'; 
+import GeneratedQuestions from "./pages/GeneratedQuestions";
 function App() {
   return (
     <BrowserRouter>
@@ -16,6 +17,7 @@ function App() {
         <Route path="/edit-user/:id" element={<EditUser />} />
         <Route path="/admin" element={<AdminDashboard />}/>
         <Route path="/teacher" element={<TeacherDashboard />} />
+        <Route path="/teacher/generated-questions/:docId" element={<GeneratedQuestions />} />
         </Routes>
     </BrowserRouter>
   );

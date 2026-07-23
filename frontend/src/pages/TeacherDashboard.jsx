@@ -5,9 +5,15 @@ import Topbar from "../components/Topbar";
 
 import TeacherStats from "../components/teacher/TeacherStats";
 import MyCourses from "../components/teacher/MyCourses";
+import AssignmentTable from "../components/teacher/AssignmentTable";
+import AssignmentForm from "../components/teacher/AssignmentForm";
+import UploadAITest from "../components/teacher/UploadAITest";
+import AITestTable from "../components/teacher/AITestTable";
 
 import {
-    getTeacherCourses
+    getTeacherCourses,
+    getTeacherAssignments,
+    getAITests
 } from "../api/api";
 
 function TeacherDashboard() {
@@ -22,11 +28,29 @@ function TeacherDashboard() {
 
     setCourses(response.data);
 };
+    const [assignments, setAssignments] = useState([]);
+    const [aiTests, setAITests] = useState([]);
 
-    useEffect(() => {
+    const fetchAssignments = async () => {
+
+    const response =
+        await getTeacherAssignments();
+
+    setAssignments(response.data);
+
+};
+    const fetchAITests = async () => {
+
+    const response = await getAITests();
+
+    setAITests(response.data);
+
+    };
+        useEffect(() => {
 
         fetchCourses();
-
+        fetchAssignments();
+        fetchAITests();
     }, []);
 
     return (
@@ -49,12 +73,27 @@ function TeacherDashboard() {
                         Manage Courses, Assignments and AI Tests
                     </p>
 
-                    {/*<TeacherStats />*/}
+                    <TeacherStats />
 
                     <MyCourses
                         courses={courses}
                     />
-
+                    <AssignmentForm
+                        courses={courses}
+                        fetchAssignments={fetchAssignments}
+                    />
+                    <AssignmentTable
+                        assignments={assignments}
+                        fetchAssignments={fetchAssignments}
+                    />
+                    <UploadAITest
+                        courses={courses}
+                        fetchAITests={fetchAITests}
+                    />
+                    <AITestTable
+                        aiTests={aiTests}
+                        fetchAITests={fetchAITests}
+                    />
                 </div>
 
             </div>
